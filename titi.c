@@ -1,4 +1,7 @@
 #include "term.h"
+
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /*Jfor f d in "${(@kv)termcap}"; do
@@ -66,7 +69,7 @@ char *tgetstr(const char* id, char **area) {
 }
 
 int tgetent(char *bp, const char *name) {
-    return tgetstr(name, 0) ? 1 : 0;
+    return 1;
 }
 
 int tgetflag(const char *id) {
@@ -83,4 +86,41 @@ int tgetnum(const char *id) {
     if (*end)
 	return -1;
     return n;
+}
+
+char *tgoto(const char *cap, int col, int row) {
+    static char output[20];
+    int top;
+    const char *in;
+    char *out = output;
+    for (in = cap; *in; in++) {
+	if (*in != '%' || !++in) {
+	    *out++ = *in;
+	    continue;
+	}
+	switch (*in) {
+	    case 'i':
+		col++; row++;
+		break;
+	    case 'p':
+		top = *++in == '1' ? row : col;
+		break;
+	    case 'd':
+		out += sprintf(out, "%d", top);
+		break;
+	}
+    }
+    *out = '\0';
+    return output;
+}
+
+int tputs(const char *str, int affcnt, int (*putc)(int)) {
+    const char *p;
+    if (!str)
+	return 1;
+    for (p=str; *p; p++) {
+	if ((putc)(*p) == EOF)
+	    return 1;
+    }
+    return 0;
 }
