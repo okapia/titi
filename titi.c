@@ -43,7 +43,7 @@ tigetstr
 
 /* some like co, might need to be dynamic */
 static struct { char *tc; char *ti; char *val; } db[] = {
-  #include "harddb.tbl"
+    #include "harddb.tbl"
 };
 
 int setupterm(const char *term, int fildes, int *errret) {
@@ -123,4 +123,33 @@ int tputs(const char *str, int affcnt, int (*putc)(int)) {
 	    return 1;
     }
     return 0;
+}
+
+int putp(const char *str) {
+    return tputs(str, 1, putchar);
+}
+
+char *tigetstr(char *capname) {
+    int i;
+    for (i=0; i < sizeof(db)/sizeof(*db); i++) {
+	if (!strcmp(db[i].ti, capname))
+	    return db[i].val;
+    }
+    return 0;
+}
+
+int tigetflag(char *capname) {
+    char *flag = tigetstr(capname);
+    return flag && !strcmp(flag, "yes");
+}
+
+int tigetnum(char *capname) {
+    char *num = tigetstr(capname);
+    if (!num)
+	return -1;
+    char *end;
+    long n = strtol(num, &end, 10);
+    if (*end)
+	return -1;
+    return n;
 }

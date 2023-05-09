@@ -5,6 +5,6 @@ setopt extendedglob nobanghist
 for f d in "${(@kv)termcap}"; do
   e="${${(b)d}//$'\033'/?}"
   printf '  { "%s", "%s", "%s" },\n' $f "${(k)terminfo[(r)$~e]}" ${${${(qqqq)d}#\$\'}%\'}
-done|LC_COLLATE=C sort> harddb.tbl
+done|LC_COLLATE=C sort> $TERM.tbl
 
 
